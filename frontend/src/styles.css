@@ -1,0 +1,4 @@
+/* frontend/src/styles.css */
+body { background: #fafafa; color: #222; }
+h2, h3, h4 { color: #1a202c; }
+pre { background: #fff; padding: 8px; border-radius: 6px; border: 1px solid #eee; }

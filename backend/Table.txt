@@ -1,0 +1,73 @@
+Table
+Create Table
+user_profiles
+CREATE TABLE `user_profiles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) DEFAULT NULL,
+  `age` int(11) DEFAULT NULL,
+  `height_cm` int(11) DEFAULT NULL,
+  `weight_kg` float DEFAULT NULL,
+  `gender` enum('male','female') DEFAULT NULL,
+  `activity_level` enum('sedentary','light','moderate','heavy') DEFAULT NULL,
+  `goal` enum('loss','maintain','gain') DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4
+
+
+
+
+
+
+
+Table
+Create Table
+user_food_logs
+CREATE TABLE `user_food_logs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` varchar(100) NOT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT current_timestamp(),
+  `raw_text` text DEFAULT NULL,
+  `parsed_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`parsed_json`)),
+  `totals_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`totals_json`)),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=62 DEFAULT CHARSET=utf8mb4
+
+
+
+
+
+
+Table
+Create Table
+foods
+CREATE TABLE `foods` (
+  `id` int(11) NOT NULL,
+  `food_name_singular` varchar(100) NOT NULL,
+  `food_name_plural` varchar(100) DEFAULT NULL,
+  `calories_per_unit` float NOT NULL,
+  `protein_per_unit` float DEFAULT NULL,
+  `carbs_per_unit` float DEFAULT NULL,
+  `fat_per_unit` float DEFAULT NULL,
+  `fiber_per_unit` float DEFAULT NULL,
+  `sugar_per_unit` float DEFAULT NULL,
+  `sodium_per_unit_mg` float DEFAULT NULL,
+  `cholesterol_per_unit_mg` float DEFAULT NULL,
+  `calcium_per_unit_mg` float DEFAULT NULL,
+  `iron_per_unit_mg` float DEFAULT NULL,
+  `vitaminA_mcg` float DEFAULT NULL,
+  `vitaminB1_mg` float DEFAULT NULL,
+  `vitaminB2_mg` float DEFAULT NULL,
+  `vitaminB3_mg` float DEFAULT NULL,
+  `vitaminB6_mg` float DEFAULT NULL,
+  `vitaminB9_mcg` float DEFAULT NULL,
+  `vitaminB12_mcg` float DEFAULT NULL,
+  `vitaminC_mg` float DEFAULT NULL,
+  `vitaminD_mcg` float DEFAULT NULL,
+  `vitaminE_mg` float DEFAULT NULL,
+  `vitaminK_mcg` float DEFAULT NULL,
+  `unit_name` varchar(50) DEFAULT NULL,
+  `grams_per_unit` float DEFAULT NULL,
+  `per_100g` tinyint(1) DEFAULT 0,
+  `base_unit` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4

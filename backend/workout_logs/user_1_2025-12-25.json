@@ -1,0 +1,44 @@
+[
+  {
+    "workout_name": "Squats",
+    "sets": 4,
+    "calories_per_set": 90.0,
+    "calories_burned": 360.0,
+    "timestamp": "2025-12-25T13:30:17.657590"
+  },
+  {
+    "workout_name": "Deadlift",
+    "sets": 4,
+    "calories_per_set": 120.0,
+    "calories_burned": 480.0,
+    "timestamp": "2025-12-25T13:30:59.710448"
+  },
+  {
+    "workout_name": "Squats",
+    "sets": 4,
+    "calories_per_set": 90.0,
+    "calories_burned": 360.0,
+    "timestamp": "2025-12-25T13:32:17.930246"
+  },
+  {
+    "workout_name": "Squats",
+    "sets": 4,
+    "calories_per_set": 90.0,
+    "calories_burned": 360.0,
+    "timestamp": "2025-12-25T18:09:22.420917"
+  },
+  {
+    "workout_name": "Bench Press",
+    "sets": 4,
+    "calories_per_set": 110.0,
+    "calories_burned": 440.0,
+    "timestamp": "2025-12-25T18:30:14.657518"
+  },
+  {
+    "workout_name": "Squats",
+    "sets": 4,
+    "calories_per_set": 90.0,
+    "calories_burned": 360.0,
+    "timestamp": "2025-12-25T19:56:06.796606"
+  }
+]

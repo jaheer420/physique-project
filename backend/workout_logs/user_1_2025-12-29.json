@@ -1,0 +1,44 @@
+[
+  {
+    "workout_name": "Squats",
+    "sets": 4,
+    "calories_per_set": 90.0,
+    "calories_burned": 360.0,
+    "timestamp": "2025-12-29T12:13:01.662075"
+  },
+  {
+    "workout_name": "Squats",
+    "sets": 4,
+    "calories_per_set": 90.0,
+    "calories_burned": 360.0,
+    "timestamp": "2025-12-29T13:11:15.620099"
+  },
+  {
+    "workout_name": "Burpees",
+    "sets": 3,
+    "calories_per_set": 140.0,
+    "calories_burned": 420.0,
+    "timestamp": "2025-12-29T13:15:11.344675"
+  },
+  {
+    "workout_name": "Bicep Curls",
+    "sets": 3,
+    "calories_per_set": 55.0,
+    "calories_burned": 165.0,
+    "timestamp": "2025-12-29T13:29:13.761227"
+  },
+  {
+    "workout_name": "Squats",
+    "sets": 4,
+    "calories_per_set": 90.0,
+    "calories_burned": 360.0,
+    "timestamp": "2025-12-29T21:08:11.897935"
+  },
+  {
+    "workout_name": "Squats",
+    "sets": 4,
+    "calories_per_set": 90.0,
+    "calories_burned": 360.0,
+    "timestamp": "2025-12-29T21:09:20.187806"
+  }
+]

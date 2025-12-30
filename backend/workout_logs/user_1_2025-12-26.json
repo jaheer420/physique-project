@@ -1,0 +1,44 @@
+[
+  {
+    "workout_name": "Squats",
+    "sets": 4,
+    "calories_per_set": 90.0,
+    "calories_burned": 360.0,
+    "timestamp": "2025-12-26T09:12:00.355855"
+  },
+  {
+    "workout_name": "Squats",
+    "sets": 4,
+    "calories_per_set": 90.0,
+    "calories_burned": 360.0,
+    "timestamp": "2025-12-26T09:33:09.087914"
+  },
+  {
+    "workout_name": "HIIT",
+    "sets": 5,
+    "calories_per_set": 150.0,
+    "calories_burned": 750.0,
+    "timestamp": "2025-12-26T16:23:33.511729"
+  },
+  {
+    "workout_name": "HIIT",
+    "sets": 5,
+    "calories_per_set": 150.0,
+    "calories_burned": 750.0,
+    "timestamp": "2025-12-26T16:24:31.159455"
+  },
+  {
+    "workout_name": "HIIT",
+    "sets": 5,
+    "calories_per_set": 150.0,
+    "calories_burned": 750.0,
+    "timestamp": "2025-12-26T16:24:40.416706"
+  },
+  {
+    "workout_name": "HIIT",
+    "sets": 5,
+    "calories_per_set": 150.0,
+    "calories_burned": 750.0,
+    "timestamp": "2025-12-26T16:24:55.567239"
+  }
+]
