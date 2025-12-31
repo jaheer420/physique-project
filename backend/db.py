@@ -1,7 +1,6 @@
 # backend/db.py
 
 import os
-import mysql.connector
 from mysql.connector import pooling
 
 # ----------------------------
@@ -21,6 +20,7 @@ _pool = None
 
 def get_pool():
     global _pool
+
     if _pool is None:
         _pool = pooling.MySQLConnectionPool(
             pool_name="physique_pool",
@@ -33,8 +33,11 @@ def get_pool():
             database=DB_NAME,
 
             autocommit=True,
-            ssl_disabled=True  # ✅ OK for Railway internal network
+
+            # ✅ REQUIRED for Railway public proxy
+            ssl_disabled=False
         )
+
     return _pool
 
 
