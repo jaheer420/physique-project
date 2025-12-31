@@ -41,7 +41,21 @@ def get_user_profile(user_id):
             "SELECT * FROM user_profiles WHERE user_id=%s",
             (user_id,)
         )
-        return cur.fetchone()
+        profile = cur.fetchone()
+
+        # 🛡️ SAFE DEFAULT PROFILE (IMPORTANT)
+        if not profile:
+            return {
+                "user_id": user_id,
+                "age": 25,
+                "height_cm": 170,
+                "weight_kg": 65,
+                "gender": "male",
+                "activity_level": "moderate",
+                "goal": "maintenance"
+            }
+
+        return profile
     finally:
         conn.close()
 
@@ -154,12 +168,27 @@ def update_profile():
 # =====================================================
 @app.route("/api/log", methods=["POST"])
 def api_log():
-    data = request.json
-    parsed = parse_text(data["text"])
-    computed = compute_nutrients(parsed)
-    save_log(data["user_id"], data["text"], parsed, computed)
-    return jsonify({"success": True})
+    try:
+        data = request.get_json()
 
+        if not data or "text" not in data or "user_id" not in data:
+            return jsonify({"success": False, "error": "Invalid payload"}), 400
+
+        parsed = parse_text(data["text"])
+        computed = compute_nutrients(parsed)
+
+        save_log(
+            data["user_id"],
+            data["text"],
+            parsed,
+            computed
+        )
+
+        return jsonify({"success": True})
+
+    except Exception as e:
+        print("ERROR in /api/log:", e)
+        return jsonify({"success": False, "error": "Log failed"}), 500
 
 @app.route("/api/logs")
 def api_logs():
@@ -214,7 +243,8 @@ def today_summary(user_id):
 
         # 3️⃣ Handle EMPTY case (VERY IMPORTANT)
         if not rows:
-            return totals
+            return jsonify(totals)
+
 
         # 4️⃣ Parse JSON safely
         for row in rows:
@@ -229,7 +259,8 @@ def today_summary(user_id):
                 totals["carbs"] += item.get("carbs", 0)
                 totals["fat"] += item.get("fat", 0)
 
-        return totals
+        return jsonify(totals)
+
 
     except Exception as e:
         # 🔥 TEMP debug (important)
@@ -244,28 +275,34 @@ def today_summary(user_id):
 # =====================================================
 @app.route("/api/summary/macros/<int:user_id>")
 def macro_summary(user_id):
-    profile = get_user_profile(user_id)
-    consumed = get_today_totals(user_id)
+    try:
+        profile = get_user_profile(user_id)
+        consumed = get_today_totals(user_id)
 
-    calories_target = calculate_daily_calories(profile)
+        calories_target = calculate_daily_calories(profile) or 2000
 
-    targets = {
-        "calories": calories_target,
-        "protein": round((calories_target * 0.25) / 4, 1),
-        "carbs": round((calories_target * 0.45) / 4, 1),
-        "fat": round((calories_target * 0.30) / 9, 1)
-    }
-
-    def percent(v, t):
-        return min(int((v / t) * 100), 100) if t else 0
-
-    return jsonify({
-        "targets": targets,
-        "consumed": consumed,
-        "progress": {
-            k: percent(consumed[k], targets[k]) for k in targets
+        targets = {
+            "calories": calories_target,
+            "protein": round((calories_target * 0.25) / 4, 1),
+            "carbs": round((calories_target * 0.45) / 4, 1),
+            "fat": round((calories_target * 0.30) / 9, 1)
         }
-    })
+
+        def percent(v, t):
+            return min(int((v / t) * 100), 100) if t else 0
+
+        return jsonify({
+            "targets": targets,
+            "consumed": consumed,
+            "progress": {
+                k: percent(consumed.get(k, 0), targets[k])
+                for k in targets
+            }
+        })
+
+    except Exception as e:
+        print("ERROR in macro_summary:", e)
+        return jsonify({"error": "Macro summary failed"}), 500
 
 
 # =====================================================
@@ -280,8 +317,10 @@ def weekly_summary(user_id):
     met_days = sum(1 for d in data if d["calories"] and d["calories"] <= target)
 
     avg = lambda k: round(
-        sum(d[k] or 0 for d in data) / 7, 2
+        sum((d.get(k) or 0) for d in data) / 7, 2
     )
+
+
 
     return jsonify({
         "average_calories": avg("calories"),
@@ -292,7 +331,6 @@ def weekly_summary(user_id):
         "status": "Good progress ✅" if met_days >= 5 else "Needs improvement ⚠️",
         "days": data
     })
-
 
 # =====================================================
 # 🎯 TARGET-BASED FOOD RECOMMENDATION (FIXED)
@@ -310,7 +348,7 @@ def recommend_for_target():
         return jsonify({"error": "Target calories must be greater than zero"}), 400
 
     # -------------------------------
-    # 2. Fetch foods from DB (EXTENDED)
+    # 2. Fetch foods from DB
     # -------------------------------
     conn = get_conn()
     cur = conn.cursor(dictionary=True)
@@ -348,13 +386,16 @@ def recommend_for_target():
         if remaining_cal <= 0:
             break
 
-        calories_per_unit = f["calories_per_unit"]
-        if not calories_per_unit or calories_per_unit <= 0:
+        calories_per_unit = f.get("calories_per_unit") or 0
+        protein_unit = f.get("protein_per_unit") or 0
+        carbs_unit = f.get("carbs_per_unit") or 0
+        fat_unit = f.get("fat_per_unit") or 0
+
+        if calories_per_unit <= 0:
             continue
 
         max_units = f.get("max_units_per_day") or 1
 
-        # 🔒 REAL-WORLD SAFE QUANTITY
         units = min(
             int(remaining_cal // calories_per_unit),
             int(max_units)
@@ -364,9 +405,9 @@ def recommend_for_target():
             continue
 
         calories = units * calories_per_unit
-        protein = units * (f["protein_per_unit"] or 0)
-        carbs = units * (f["carbs_per_unit"] or 0)
-        fat = units * (f["fat_per_unit"] or 0)
+        protein = units * protein_unit
+        carbs = units * carbs_unit
+        fat = units * fat_unit
 
         plan.append({
             "food": f["food"],
@@ -375,8 +416,8 @@ def recommend_for_target():
             "protein": round(protein, 1),
             "carbs": round(carbs, 1),
             "fat": round(fat, 1),
-            "pros": f["pros"],
-            "cons": f["cons"]
+            "pros": f.get("pros"),
+            "cons": f.get("cons")
         })
 
         total["calories"] += calories
@@ -387,7 +428,7 @@ def recommend_for_target():
         remaining_cal -= calories
 
     # -------------------------------
-    # 4. Response
+    # 4. Response (OUTSIDE LOOP)
     # -------------------------------
     return jsonify({
         "target_calories": round(target_calories, 1),
