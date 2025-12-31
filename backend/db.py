@@ -5,7 +5,7 @@ import mysql.connector
 from mysql.connector import pooling
 
 # ----------------------------
-# MySQL Settings (Railway via ENV)
+# MySQL Settings (Railway ENV)
 # ----------------------------
 DB_HOST = os.getenv("MYSQLHOST")
 DB_PORT = int(os.getenv("MYSQLPORT", "3306"))
@@ -33,10 +33,7 @@ def get_pool():
             database=DB_NAME,
 
             autocommit=True,
-
-            # Railway MySQL requirements
-            allow_public_key_retrieval=True,
-            ssl_disabled=True,
+            ssl_disabled=True  # ✅ OK for Railway internal network
         )
     return _pool
 
