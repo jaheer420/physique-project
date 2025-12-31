@@ -1,20 +1,21 @@
 # backend/db.py
 
 import os
+import mysql.connector
 from mysql.connector import pooling
 
-# ----------------------------
-# MySQL Settings (Railway ENV)
-# ----------------------------
-DB_HOST = os.getenv("MYSQLHOST")
-DB_PORT = int(os.getenv("MYSQLPORT", "3306"))
-DB_USER = os.getenv("MYSQLUSER")
+# ====================================
+# MySQL ENV (Railway PUBLIC proxy)
+# ====================================
+DB_HOST = os.getenv("MYSQLHOST")          # caboose.proxy.rlwy.net
+DB_PORT = int(os.getenv("MYSQLPORT", 3306))  # 50238
+DB_USER = os.getenv("MYSQLUSER")          # root
 DB_PASSWORD = os.getenv("MYSQLPASSWORD")
 DB_NAME = os.getenv("MYSQLDATABASE")
 
-# ----------------------------
-# Connection Pool
-# ----------------------------
+# ====================================
+# Connection Pool (SSL REQUIRED)
+# ====================================
 _pool = None
 
 
@@ -34,8 +35,10 @@ def get_pool():
 
             autocommit=True,
 
-            # ✅ REQUIRED for Railway public proxy
-            ssl_disabled=False
+            # ✅ CRITICAL FOR RAILWAY PUBLIC MYSQL
+            ssl_ca=None,
+            ssl_verify_cert=False,
+            ssl_verify_identity=False,
         )
 
     return _pool
