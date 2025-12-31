@@ -182,25 +182,62 @@ def api_logs():
 # =====================================================
 # TODAY SUMMARY
 # =====================================================
+import json
+from datetime import date
+
 @app.route("/api/summary/today/<int:user_id>")
 def today_summary(user_id):
-    profile = get_user_profile(user_id)
-    target = calculate_daily_calories(profile)
-    t = get_today_totals(user_id)
+    conn = get_conn()
+    try:
+        cur = conn.cursor(dictionary=True)
 
-    remaining = target - t["calories"]
+        # 1️⃣ Fetch logs safely
+        cur.execute(
+            """
+            SELECT parsed_json
+            FROM user_food_logs
+            WHERE user_id = %s
+              AND DATE(timestamp) = CURDATE()
+            """,
+            (user_id,)
+        )
 
-    return jsonify({
-        "daily_target": target,
-        "consumed": t["calories"],
-        "remaining": max(remaining, 0),
-        "exceeded": abs(min(remaining, 0)),
-        "protein": round(t["protein"], 2),
-        "carbs": round(t["carbs"], 2),
-        "fat": round(t["fat"], 2),
-        "advice": generate_advice(t["calories"], target, profile["goal"])
-    })
+        rows = cur.fetchall()
 
+        # 2️⃣ Initialize totals
+        totals = {
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0
+        }
+
+        # 3️⃣ Handle EMPTY case (VERY IMPORTANT)
+        if not rows:
+            return totals
+
+        # 4️⃣ Parse JSON safely
+        for row in rows:
+            try:
+                items = json.loads(row["parsed_json"])
+            except Exception:
+                continue
+
+            for item in items:
+                totals["calories"] += item.get("calories", 0)
+                totals["protein"] += item.get("protein", 0)
+                totals["carbs"] += item.get("carbs", 0)
+                totals["fat"] += item.get("fat", 0)
+
+        return totals
+
+    except Exception as e:
+        # 🔥 TEMP debug (important)
+        print("ERROR in today_summary:", e)
+        return {"error": str(e)}, 500
+
+    finally:
+        conn.close()
 
 # =====================================================
 # MACRO SUMMARY
