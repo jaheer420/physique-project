@@ -1,8 +1,10 @@
 // frontend/src/api.js
 
 // ---------------- BACKEND BASE URL ----------------
-// ✅ FIX: Use environment variable instead of hardcoded localhost
-const API_BASE = import.meta.env.VITE_API_URL;
+// ✅ Use env variable, fallback to Render backend (SAFE)
+const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  "https://physique-backend1.onrender.com";
 
 // ---------------- HELPER ----------------
 async function safeJson(response) {
@@ -125,7 +127,7 @@ export async function getWeeklySummary(user_id) {
 }
 
 // ---------------------------------------------------
-// TARGET-BASED FOOD RECOMMENDATION
+// 🎯 TARGET-BASED FOOD RECOMMENDATION (POST)
 // ---------------------------------------------------
 export async function getTargetRecommendation(payload) {
   try {

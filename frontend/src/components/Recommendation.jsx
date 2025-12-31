@@ -29,24 +29,54 @@ export default function Recommendation() {
   const [targetCalories, setTargetCalories] = useState("");
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null); // ✅ NEW (SAFE)
 
   async function generatePlan() {
     if (!targetCalories) return;
 
     setLoading(true);
-    const res = await getTargetRecommendation({
-      target_calories: Number(targetCalories)
-    });
-    setData(res);
+    setError(null);
+
+    try {
+      const res = await getTargetRecommendation({
+        target_calories: Number(targetCalories)
+      });
+
+      if (!res || !res.total_nutrition) {
+        setError("Unable to generate food plan. Try again.");
+        setData(null);
+      } else {
+        setData(res);
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Server error. Please try later.");
+      setData(null);
+    }
+
     setLoading(false);
   }
+
+  /* =========================
+     SAFE DATA GUARDS
+  ========================== */
+
+  const hasNutrition =
+    data &&
+    data.total_nutrition &&
+    typeof data.total_nutrition.calories === "number";
+
+  const foods =
+    data && Array.isArray(data.recommended_foods)
+      ? data.recommended_foods
+      : [];
 
   /* =========================
      CHART DATA (SAFE DERIVED)
   ========================== */
 
   const pieData =
-    data && {
+    hasNutrition && {
       labels: ["Protein", "Carbs", "Fat"],
       datasets: [
         {
@@ -61,7 +91,7 @@ export default function Recommendation() {
     };
 
   const barData =
-    data && {
+    hasNutrition && {
       labels: ["Target Calories", "Achieved Calories"],
       datasets: [
         {
@@ -100,8 +130,15 @@ export default function Recommendation() {
         </div>
       )}
 
+      {/* ERROR */}
+      {error && (
+        <div className="card">
+          <p style={{ color: "#ef4444" }}>❌ {error}</p>
+        </div>
+      )}
+
       {/* RESULT */}
-      {data && (
+      {hasNutrition && (
         <>
           {/* TARGET */}
           <div className="card">
@@ -113,7 +150,11 @@ export default function Recommendation() {
           <div className="card">
             <h3>🍽 Recommended Foods & Quantities</h3>
 
-            {data.recommended_foods.map((f, i) => (
+            {foods.length === 0 && (
+              <p className="muted">No foods available for this target.</p>
+            )}
+
+            {foods.map((f, i) => (
               <p key={i}>
                 {f.food} × {f.quantity} → {f.calories} kcal
               </p>
@@ -130,22 +171,26 @@ export default function Recommendation() {
           </div>
 
           {/* PIE CHART */}
-          <div className="card">
-            <h3>🥧 Macro Calories Split</h3>
-            <Pie data={pieData} />
-          </div>
+          {pieData && (
+            <div className="card">
+              <h3>🥧 Macro Calories Split</h3>
+              <Pie data={pieData} />
+            </div>
+          )}
 
           {/* BAR CHART */}
-          <div className="card">
-            <h3>📊 Target vs Achieved</h3>
-            <Bar data={barData} />
-          </div>
+          {barData && (
+            <div className="card">
+              <h3>📊 Target vs Achieved</h3>
+              <Bar data={barData} />
+            </div>
+          )}
 
           {/* EXPLANATION */}
           <div className="card">
             <h3>🧠 Why These Foods?</h3>
 
-            {data.recommended_foods.map((f, i) => (
+            {foods.map((f, i) => (
               <div key={i} style={{ marginBottom: "12px" }}>
                 <strong>{f.food}</strong>
                 <p>✅ Pros: {f.pros || "Nutritious and beneficial"}</p>

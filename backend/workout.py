@@ -4,7 +4,7 @@ import json
 from datetime import datetime, date
 from flask import Blueprint, request, jsonify
 
-print("🔥 workout.py LOADED")  # <-- IMPORTANT DEBUG PROOF
+print("🔥 workout.py LOADED")  # DEBUG PROOF
 
 # -------------------------------------------------
 # Blueprint
@@ -44,17 +44,28 @@ def read_logs(path):
 
 
 def write_logs(path, data):
-    """Write workout logs to file"""
-    with open(path, "w") as f:
+    """Atomic write to prevent corruption"""
+    temp_path = f"{path}.tmp"
+    with open(temp_path, "w") as f:
         json.dump(data, f, indent=2)
+    os.replace(temp_path, path)
 
 
 # -------------------------------------------------
 # POST: Complete workout
 # -------------------------------------------------
-@workout_bp.route("/complete", methods=["POST"])
+@workout_bp.route("/complete", methods=["POST", "OPTIONS"])
 def complete_workout():
-    data = request.get_json(force=True)
+    if request.method == "OPTIONS":
+        return jsonify({"ok": True}), 200
+
+    data = request.get_json(silent=True)
+
+    if not data:
+        return jsonify({
+            "success": False,
+            "error": "Invalid or missing JSON payload"
+        }), 400
 
     # ---------------------------
     # 1. Validate payload
@@ -110,6 +121,8 @@ def complete_workout():
     # ---------------------------
     total_burned = sum(w.get("calories_burned", 0) for w in logs)
 
+    print("✅ WORKOUT SAVED:", entry)
+
     # ---------------------------
     # 5. Response
     # ---------------------------
@@ -117,7 +130,7 @@ def complete_workout():
         "success": True,
         "today_burned": total_burned,
         "logged_workout": entry
-    })
+    }), 200
 
 
 # -------------------------------------------------
@@ -125,7 +138,7 @@ def complete_workout():
 # -------------------------------------------------
 @workout_bp.route("/today/<int:user_id>", methods=["GET"])
 def today_burned(user_id):
-    print("🔥 TODAY ROUTE HIT:", user_id)  # <-- DEBUG PROOF
+    print("🔥 TODAY ROUTE HIT:", user_id)
 
     file_path = get_log_file(user_id)
     logs = read_logs(file_path)
@@ -137,4 +150,4 @@ def today_burned(user_id):
         "today_burned": total_burned,
         "workouts_count": len(logs),
         "workouts": logs
-    })
+    }), 200

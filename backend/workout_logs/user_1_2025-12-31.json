@@ -1,0 +1,23 @@
+[
+  {
+    "workout_name": "Squats",
+    "sets": 4,
+    "calories_per_set": 90.0,
+    "calories_burned": 360.0,
+    "timestamp": "2025-12-31T13:05:53.440026"
+  },
+  {
+    "workout_name": "Bicep Curls",
+    "sets": 3,
+    "calories_per_set": 55.0,
+    "calories_burned": 165.0,
+    "timestamp": "2025-12-31T13:06:51.226837"
+  },
+  {
+    "workout_name": "Tricep Dips",
+    "sets": 3,
+    "calories_per_set": 65.0,
+    "calories_burned": 195.0,
+    "timestamp": "2025-12-31T13:08:53.806762"
+  }
+]
